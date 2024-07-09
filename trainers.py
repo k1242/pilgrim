@@ -67,7 +67,7 @@ class Trainer:
         """
         net_local = net 
         if weights2load: 
-            net_local.load_state_dict(torch.load(weights2load))
+            net_local.load_state_dict(torch.load(weights2load, map_location=device))
             print("weights loaded")
         self.net = net_local.to(device)
         self.device = device
