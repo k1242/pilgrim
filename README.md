@@ -52,13 +52,13 @@ python train.py --hd1 2000 --hd2 1000 --nrd 2 --epochs 100 --cube_size 4 --cube_
 ```
 
 Parameters:
--hd1: Size of the first hidden layer (e.g., 2000).
--hd2: Size of the second hidden layer (0 means no second layer).
--nrd: Number of residual blocks (0 means no residual blocks).
--epochs: Number of training epochs.
--batch_size: Batch size (default 10000).
--lr: Learning rate for the optimizer (default 0.001).
--K_min and --K_max: Minimum and maximum values for random walks (default 1 and 30).
--cube_size: Cube size (e.g., 3 for 3x3x3 or 4 for 4x4x4).
--cube_type: Cube move set (qtm for quarter-turn metric or all for all moves).
--name: Training session name (optional, auto-generated if not provided).
+- hd1: Size of the first hidden layer (e.g., 2000).
+- hd2: Size of the second hidden layer (0 means no second layer).
+- nrd: Number of residual blocks (0 means no residual blocks).
+- epochs: Number of training epochs.
+- batch_size: Batch size (default 10000).
+- lr: Learning rate for the optimizer (default 0.001).
+- K_min and --K_max: Minimum and maximum values for random walks (default 1 and 30).
+- cube_size: Cube size (e.g., 3 for 3x3x3 or 4 for 4x4x4).
+- cube_type: Cube move set (qtm for quarter-turn metric or all for all moves).
+- name: Training session name (optional, auto-generated if not provided).
