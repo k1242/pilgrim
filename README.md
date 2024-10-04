@@ -33,7 +33,7 @@ Pilgrim Library is a Python library for efficient state space search and model t
 
 ### Data Setup
 
-You will need to populate the `generators/` folder with `.json` files that define the cube moves and states for the desired cube size and type. The files should follow this structure:
+You will need to populate the `generators/` folder with `.json` files that define the cube moves and states for the desired cube size and type (if provided not enough). The files should follow this structure:
 - `generators/qtm_cube4.json`
 - `generators/all_cube4.json`
 
@@ -48,7 +48,7 @@ You can run the `train.py` script to train a model on cube-based data. The model
 #### Basic Usage
 
 ```bash
-python train.py --hd1 2000 --hd2 1000 --nrd 2 --epochs 100 --cube_size 4 --cube_type qtm
+python train.py --hd1 2000 --hd2 1418 --nrd 2 --epochs 100 --cube_size 4 --cube_type all
 ```
 
 #### Parameters:
@@ -72,7 +72,7 @@ You can test a trained **Pilgrim** model using the `test.py` script. This script
 ### Basic Usage
 
 ~~~~bash
-python test.py --cube_size 4 --cube_type qtm --weights weights/cube4_all_MLP2_2000_1418_0_4.00M_1727996220_e2pow14.pth --tests_num 10 --B 4096
+python test.py --cube_size 4 --cube_type all --weights weights/cube4_all_MLP2_2000_1418_0_4.00M_1727996220_e2pow14.pth --tests_num 10 --B 4096
 ~~~~
 
 ### Parameters
@@ -89,9 +89,9 @@ python test.py --cube_size 4 --cube_type qtm --weights weights/cube4_all_MLP2_20
 
 *   **Log File**: The test results, including solution lengths and attempts, are saved to a log file in the `logs/` directory. The log file is named based on the cube size, cube type, model ID, epoch, and beam size:
 
-    ~~~~text
-    logs/test_cube4_qtm_123456_10000_B4096.json
-    ~~~~
+	~~~~text
+	logs/test_cube4_qtm_123456_10000_B4096.json
+	~~~~
 
 *   **Console Output**: The solution length for each solved test case is printed to the console. If a solution is not found, it will print "Solution not found" for that test case.
 
