@@ -1,18 +1,27 @@
 import torch
+import json
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def list2tensor(states):
-    """Convert a list of states to a tensor."""
-    return torch.tensor(states, dtype=torch.int64, device=device)
+def load_cube_data(cube_size, cube_type):
+    """Load cube data based on cube size and type (qtm or all)."""
+    file_path = f"generators/{cube_type}_cube{cube_size}.json"
+    
+    with open(file_path, 'rb') as f:
+        data = json.load(f)
+    
+    actions = data["actions"]
+    action_names = data["names"]
+    
+    return torch.tensor(actions, dtype=torch.int64, device=device), action_names
 
 def generate_inverse_moves(moves):
     """Generate the inverse moves for a given list of moves."""
     inverse_moves = [0] * len(moves)
     for i, move in enumerate(moves):
-        if "'" in move:  # It's an aj'
+        if "'" in move:  # It's an a_j'
             inverse_moves[i] = moves.index(move.replace("'", ""))
-        else:  # It's an aj
+        else:  # It's an a_j
             inverse_moves[i] = moves.index(move + "'")
     return inverse_moves
 
@@ -37,25 +46,12 @@ def get_unique_states(states, bad_hashes, hash_vec):
     )
     return states[mask][unique_mask]
 
-def do_random_step(states, last_moves, all_moves, inverse_moves):
-    """Perform a random step while avoiding inverse moves."""
-    possible_moves = torch.ones((states.size(0), len(all_moves)), dtype=torch.bool, device=states.device)
-    possible_moves[torch.arange(states.size(0)), inverse_moves[last_moves]] = False
-    next_moves = torch.multinomial(possible_moves.float(), 1).squeeze()
-    new_states = torch.gather(states, 1, all_moves[next_moves])
-    return new_states, next_moves
-
-def generate_random_walks(V0, state_size, all_moves, inverse_moves, k=1000, K_min=1, K_max=30):
-    """Generate random walks for training."""
-    X = torch.zeros(((K_max - K_min + 1) * k, state_size), dtype=torch.int8, device=device)
-    Y = torch.arange(K_min, K_max + 1, device=device).repeat_interleave(k)
-    
-    for j, K in enumerate(range(K_min, K_max + 1)):
-        states = V0.repeat(k, 1)
-        last_moves = torch.full((k,), -1, dtype=torch.int64, device=device)
-        for _ in range(K):
-            states, last_moves = do_random_step(states, last_moves, all_moves, inverse_moves)
-        X[j * k:(j + 1) * k] = states
-    
-    perm = torch.randperm(X.size(0), device=device)
-    return X[perm], Y[perm]
+def get_unique_states(states, states_bad_hashed, hash_vec):
+    """Filter unique states by removing duplicates based on hash."""
+    idx1 = torch.arange(states.size(0), dtype=torch.int64, device=states.device)
+    hashed = state2hash(states, hash_vec)
+    mask1  = ~torch.isin(hashed, states_bad_hashed)
+    hashed = hashed[mask1]
+    hashed_sorted, idx2 = torch.sort(hashed)
+    mask2 = torch.concat((torch.tensor([True], device=device), hashed_sorted[1:] - hashed_sorted[:-1] > 0))
+    return states[mask1][idx2[mask2]], idx1[mask1][idx2[mask2]] 

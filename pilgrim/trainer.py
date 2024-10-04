@@ -5,10 +5,12 @@ import pandas as pd
 import schedulefree
 import math
 
-from .utils import generate_random_walks
-
 class Trainer:
-    def __init__(self, net, num_epochs, device, batch_size=10000, lr=0.001, name="", K_min=1, K_max=55, all_moves=None, inverse_moves=None, V0=None):
+    def __init__(self, 
+                 net, num_epochs, device, 
+                 batch_size=10000, lr=0.001, name="", K_min=1, K_max=55, 
+                 all_moves=None, inverse_moves=None, V0=None
+                ):
         self.net = net.to(device)
         self.lr = lr
         self.device = device
@@ -18,6 +20,7 @@ class Trainer:
         self.optimizer = schedulefree.AdamWScheduleFree(self.net.parameters(), lr=lr)
         self.epoch = 0
         self.id = int(time.time())
+        print(f'Model id: {self.id}')
         self.log_dir = "logs"
         self.weights_dir = "weights"
         self.name = name
@@ -25,11 +28,36 @@ class Trainer:
         self.K_max = K_max
         self.walkers_num = 1_000_000 // self.K_max
         self.all_moves = all_moves
+        self.n_gens = all_moves.size(0)
+        self.state_size = all_moves.size(1)
         self.inverse_moves = inverse_moves
         self.V0 = V0
         os.makedirs(self.log_dir, exist_ok=True)
         os.makedirs(self.weights_dir, exist_ok=True)
 
+    def do_random_step(self, states, last_moves):
+        """Perform a random step while avoiding inverse moves."""
+        possible_moves = torch.ones((states.size(0), self.n_gens), dtype=torch.bool, device=self.device)
+        possible_moves[torch.arange(states.size(0)), self.inverse_moves[last_moves]] = False
+        next_moves = torch.multinomial(possible_moves.float(), 1).squeeze()
+        new_states = torch.gather(states, 1, self.all_moves[next_moves])
+        return new_states, next_moves
+
+    def generate_random_walks(self, k=1000, K_min=1, K_max=30):
+        """Generate random walks for training."""
+        X = torch.zeros(((K_max - K_min + 1) * k, self.state_size), dtype=torch.int8, device=self.device)
+        Y = torch.arange(K_min, K_max + 1, device=self.device).repeat_interleave(k)
+
+        for j, K in enumerate(range(K_min, K_max + 1)):
+            states = self.V0.repeat(k, 1)
+            last_moves = torch.full((k,), -1, dtype=torch.int64, device=self.device)
+            for _ in range(K):
+                states, last_moves = self.do_random_step(states, last_moves)
+            X[j * k:(j + 1) * k] = states
+
+        perm = torch.randperm(X.size(0), device=self.device)
+        return X[perm], Y[perm]
+        
     def _train_epoch(self, X, Y):
         self.net.train()
         avg_loss = 0.0
@@ -55,7 +83,7 @@ class Trainer:
 
             # Data generation
             data_gen_start = time.time()
-            X, Y = generate_random_walks(self.V0, self.V0.size(1), self.all_moves, self.inverse_moves, k=self.walkers_num, K_min=self.K_min, K_max=self.K_max)
+            X, Y = self.generate_random_walks(k=self.walkers_num, K_min=self.K_min, K_max=self.K_max)
             data_gen_time = time.time() - data_gen_start
 
             # Training step
@@ -63,7 +91,8 @@ class Trainer:
             train_loss = self._train_epoch(X, Y.float())
             epoch_time = time.time() - epoch_start
 
-            log_file = f"{self.log_dir}/{self.name}_{self.id}.csv"
+            # Log training data
+            log_file = f"{self.log_dir}/train_{self.name}_{self.id}.csv"
             log_data = pd.DataFrame([{
                 'epoch': self.epoch, 
                 'train_loss': train_loss, 
@@ -79,11 +108,22 @@ class Trainer:
                 weights_file = f"{self.weights_dir}/{self.name}_{self.id}_e2pow{log2_epoch}.pth"
                 torch.save(self.net.state_dict(), weights_file)
 
+                # Print saving information with timestamp and train loss
+                timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+                print(f"[{timestamp}] Saved weights at epoch {self.epoch:5d}. Train Loss: {train_loss:.2f}")
+
             # Save weights at 10,000 and 50,000 epochs
             if self.epoch in [10000, 50000]:
                 weights_file = f"{self.weights_dir}/{self.name}_{self.id}_e{self.epoch}.pth"
                 torch.save(self.net.state_dict(), weights_file)
 
+                # Print saving information with timestamp and train loss
+                timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+
         # Save final weights
         final_weights_file = f"{self.weights_dir}/{self.name}_{self.id}_e{self.epoch}_final.pth"
         torch.save(self.net.state_dict(), final_weights_file)
+
+        # Print final saving information
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        print(f"[{timestamp}] Finished. Saved final weights at epoch {self.epoch}. Train Loss: {train_loss:.2f}.")

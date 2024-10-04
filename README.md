@@ -22,7 +22,7 @@ Pilgrim Library is a Python library for efficient state space search and model t
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/your-username/pilgrim.git
+    git clone https://github.com/k1242/pilgrim.git
     cd pilgrim
     ```
 
@@ -51,14 +51,50 @@ You can run the `train.py` script to train a model on cube-based data. The model
 python train.py --hd1 2000 --hd2 1000 --nrd 2 --epochs 100 --cube_size 4 --cube_type qtm
 ```
 
-Parameters:
-- hd1: Size of the first hidden layer (e.g., 2000).
-- hd2: Size of the second hidden layer (0 means no second layer).
-- nrd: Number of residual blocks (0 means no residual blocks).
-- epochs: Number of training epochs.
-- batch_size: Batch size (default 10000).
-- lr: Learning rate for the optimizer (default 0.001).
-- K_min and --K_max: Minimum and maximum values for random walks (default 1 and 30).
-- cube_size: Cube size (e.g., 3 for 3x3x3 or 4 for 4x4x4).
-- cube_type: Cube move set (qtm for quarter-turn metric or all for all moves).
-- name: Training session name (optional, auto-generated if not provided).
+#### Parameters:
+
+*   `--hd1`: Size of the first hidden layer (e.g., `2000`).
+*   `--hd2`: Size of the second hidden layer (`0` means no second layer).
+*   `--nrd`: Number of residual blocks (`0` means no residual blocks).
+*   `--epochs`: Number of training epochs.
+*   `--batch_size`: Batch size (default `10000`).
+*   `--lr`: Learning rate for the optimizer (default `0.001`).
+*   `--K_min` and `--K_max`: Minimum and maximum values for random walks (default `1` and `30`).
+*   `--cube_size`: Cube size (e.g., `3` for 3x3x3 or `4` for 4x4x4).
+*   `--cube_type`: Cube move set (`qtm` for quarter-turn metric or `all` for all moves).
+*   `--name`: Training session name (optional, auto-generated if not provided).
+
+
+## Testing the Model
+
+You can test a trained **Pilgrim** model using the `test.py` script. This script loads the model, applies it to a set of cube states, and attempts to solve them using a beam search.
+
+### Basic Usage
+
+~~~~bash
+python test.py --cube_size 4 --cube_type qtm --weights weights/cube4_all_MLP2_2000_1418_0_4.00M_1727996220_e2pow14.pth --tests_num 10 --B 4096
+~~~~
+
+### Parameters
+
+*   `--cube_size`: The size of the cube (e.g., `4` for 4x4x4 cube).
+*   `--cube_type`: The cube type, either `qtm` (quarter-turn metric) or `all` (all moves).
+*   `--weights`: Path to the saved model weights.
+*   `--tests`: Path to the test dataset (optional). If not provided, it defaults to the dataset in `datasets/{cube_type}_cube{cube_size}.pt`.
+*   `--B`: Beam size for the beam search (default `4096`).
+*   `--tests_num`: Number of test cases to run (default `10`).
+
+
+### Output
+
+*   **Log File**: The test results, including solution lengths and attempts, are saved to a log file in the `logs/` directory. The log file is named based on the cube size, cube type, model ID, epoch, and beam size:
+
+    ~~~~text
+    logs/test_cube4_qtm_123456_10000_B4096.json
+    ~~~~
+
+*   **Console Output**: The solution length for each solved test case is printed to the console. If a solution is not found, it will print "Solution not found" for that test case.
+
+### Average Solution Length
+
+At the end of the test, the script calculates the average solution length across all solved cubes and prints it along with the total time taken for testing.
