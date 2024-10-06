@@ -15,6 +15,8 @@ def main():
     parser.add_argument("--lr", type=float, default=0.001, help="Learning rate")
     parser.add_argument("--dropout", type=float, default=0.0, help="Dropout")
     parser.add_argument("--optimizer", type=str, choices=["Adam", "AdamSF"], default="Adam", help="Optimizer (Adam or AdamSF)")
+    parser.add_argument("--activation", type=str, choices=["relu", "mish"], default="relu", help="Activation function (relu or mish)")
+    parser.add_argument("--use_batch_norm", type=bool, default=True, help="Batch normalization usage (True or False, default True).")
     parser.add_argument("--K_min", type=int, default=1, help="Minimum K value for random walks")
     parser.add_argument("--K_max", type=int, default=30, help="Maximum K value for random walks")
     parser.add_argument("--device_id", type=int, default=0, help="Device ID")
@@ -62,7 +64,8 @@ def main():
         hd1=args.hd1,
         hd2=args.hd2,
         nrd=args.nrd,
-        dropout_rate=args.dropout
+        dropout_rate=args.dropout,
+        activation_function=args.activation
     ).to(device)
 
     # Calculate the number of model parameters

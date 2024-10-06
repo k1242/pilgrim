@@ -40,7 +40,9 @@ def main():
     V0 = torch.arange(6, dtype=torch.int8, device=device).repeat_interleave(face_size)
 
     # Load model and weights
-    model = Pilgrim(state_size, info['hd1'], info['hd2'], info['nrd'])
+    model = Pilgrim(state_size=state_size, 
+                    hd1=info['hd1'], hd2=info['hd2'], nrd=info['nrd'], 
+                    activation_function=info['activation'], use_batch_norm=info['use_batch_norm'])
     model.load_state_dict(torch.load(args.weights, weights_only=False, map_location=device))
     model.eval()
     
