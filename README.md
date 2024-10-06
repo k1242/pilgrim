@@ -63,7 +63,6 @@ python train.py --cube_size 4 --cube_type all --K_max 48 --hd1 1000 --hd2 500 --
 *   `--optimizer`: Optimizer, `Adam` or `AdamSF` means schedulefree module use (default `Adam`).
 *   `--activation`: Activation function, `relu` or `mish` (default `relu`).
 *   `--use_batch_norm`: Batch normalization usage, `True` or `False` (default `True`).
-*   `--optimizer`: Optimizer, `Adam` or `AdamSF` means schedulefree module use (default `Adam`).
 *   `--K_min` and `--K_max`: Minimum and maximum values for random walks (default `1` and `30`).
 *   `--cube_size`: Cube size (e.g., `3` for 3x3x3 or `4` for 4x4x4).
 *   `--cube_type`: Cube move set (`qtm` for quarter-turn metric or `all` for all moves).
