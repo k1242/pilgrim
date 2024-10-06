@@ -31,7 +31,7 @@ class Pilgrim(nn.Module):
         self.hd2 = hd2
         self.nrd = nrd
 
-        input_dim = state_size * 6  # input_dim is fixed as state_size * 6
+        input_dim = state_size * 6
         self.input_layer = nn.Linear(input_dim, hd1)
         self.bn1 = nn.BatchNorm1d(hd1)
         self.relu = nn.ReLU()

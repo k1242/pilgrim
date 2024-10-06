@@ -9,7 +9,8 @@ class Trainer:
     def __init__(self, 
                  net, num_epochs, device, 
                  batch_size=10000, lr=0.001, name="", K_min=1, K_max=55, 
-                 all_moves=None, inverse_moves=None, V0=None
+                 all_moves=None, inverse_moves=None, V0=None, 
+                 optimizer='Adam' # Adam or AdamSF
                 ):
         self.net = net.to(device)
         self.lr = lr
@@ -17,10 +18,14 @@ class Trainer:
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.criterion = torch.nn.MSELoss()
-        self.optimizer = schedulefree.AdamWScheduleFree(self.net.parameters(), lr=lr)
+        if optimizer == 'Adam':
+            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
+        elif optimizer == 'AdamSF':
+            self.optimizer = schedulefree.AdamWScheduleFree(self.net.parameters(), lr=lr)
+        else:
+            raise ValueError(f'Wrong optimizer value ({optimizer}). It can be "Adam" or "AdamSF".')
         self.epoch = 0
         self.id = int(time.time())
-        print(f'Model id: {self.id}')
         self.log_dir = "logs"
         self.weights_dir = "weights"
         self.name = name
@@ -104,8 +109,7 @@ class Trainer:
 
             # Save weights on powers of two
             if (self.epoch & (self.epoch - 1)) == 0:
-                log2_epoch = int(math.log2(self.epoch))
-                weights_file = f"{self.weights_dir}/{self.name}_{self.id}_e2pow{log2_epoch}.pth"
+                weights_file = f"{self.weights_dir}/{self.name}_{self.id}_e{self.epoch:05d}.pth"
                 torch.save(self.net.state_dict(), weights_file)
 
                 # Print saving information with timestamp and train loss
@@ -114,14 +118,14 @@ class Trainer:
 
             # Save weights at 10,000 and 50,000 epochs
             if self.epoch in [10000, 50000]:
-                weights_file = f"{self.weights_dir}/{self.name}_{self.id}_e{self.epoch}.pth"
+                weights_file = f"{self.weights_dir}/{self.name}_{self.id}_e{self.epoch:05d}.pth"
                 torch.save(self.net.state_dict(), weights_file)
 
                 # Print saving information with timestamp and train loss
                 timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 
         # Save final weights
-        final_weights_file = f"{self.weights_dir}/{self.name}_{self.id}_e{self.epoch}_final.pth"
+        final_weights_file = f"{self.weights_dir}/{self.name}_{self.id}_e{self.epoch:05d}_final.pth"
         torch.save(self.net.state_dict(), final_weights_file)
 
         # Print final saving information

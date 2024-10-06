@@ -1,9 +1,7 @@
 import torch
 import json
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-def load_cube_data(cube_size, cube_type):
+def load_cube_data(cube_size, cube_type, device):
     """Load cube data based on cube size and type (qtm or all)."""
     file_path = f"generators/{cube_type}_cube{cube_size}.json"
     
@@ -53,5 +51,5 @@ def get_unique_states(states, states_bad_hashed, hash_vec):
     mask1  = ~torch.isin(hashed, states_bad_hashed)
     hashed = hashed[mask1]
     hashed_sorted, idx2 = torch.sort(hashed)
-    mask2 = torch.concat((torch.tensor([True], device=device), hashed_sorted[1:] - hashed_sorted[:-1] > 0))
+    mask2 = torch.concat((torch.tensor([True], device=states.device), hashed_sorted[1:] - hashed_sorted[:-1] > 0))
     return states[mask1][idx2[mask2]], idx1[mask1][idx2[mask2]] 

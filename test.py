@@ -14,15 +14,21 @@ def main():
     parser.add_argument("--weights", type=str, required=True, help="Path to the model weights")
     parser.add_argument("--B", type=int, default=4096, help="Beam size")
     parser.add_argument("--tests_num", type=int, default=10, help="Number of tests to run")
+    parser.add_argument("--device_id", type=int, default=0, help="Device ID")
+    parser.add_argument("--verbose", type=int, default=0, help="Use tqdm if verbose > 0.")
     
     args = parser.parse_args()
+    # Load model info
+    log_dir = "logs"
+    with open(f"{log_dir}/model_{'_'.join(args.weights.split('_')[:-1])[8:]}.json", "r") as json_file:
+        info = json.load(json_file)
     
     # Set device (GPU if available, otherwise CPU)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu", args.device_id)
     print(f"Start testing with {device}.")
 
     # Load cube data (moves and names)
-    all_moves, move_names = load_cube_data(args.cube_size, args.cube_type)
+    all_moves, move_names = load_cube_data(args.cube_size, args.cube_type, device)
 
     # Derive important cube parameters from the loaded data
     n_gens = all_moves.size(0)  # Number of moves
@@ -34,9 +40,7 @@ def main():
     V0 = torch.arange(6, dtype=torch.int8, device=device).repeat_interleave(face_size)
 
     # Load model and weights
-    hd1, hd2, nrd = [int(num_str) for num_str in args.weights.split("_")[3:6]]
-    model = Pilgrim(state_size, hd1, hd2, nrd)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = Pilgrim(state_size, info['hd1'], info['hd2'], info['nrd'])
     model.load_state_dict(torch.load(args.weights, weights_only=False, map_location=device))
     model.eval()
     
@@ -48,31 +52,21 @@ def main():
     tests = torch.load(tests_path, weights_only=False, map_location=device)
     tests = tests[:args.tests_num]
     tests = tests.to(device)
-        
 
     # Initialize Searcher object
-    searcher = Searcher(model=model, all_moves=all_moves, V0=V0, device=device)
+    searcher = Searcher(model=model, all_moves=all_moves, V0=V0, device=device, verbose=args.verbose)
     
     # Extract epoch information from weights file name
     epoch = args.weights.split('_')[-1][:-4]
-    model_id = args.weights.split('_')[7]
     
     # Prepare log file
-    log_dir = "logs"
     os.makedirs(log_dir, exist_ok=True)
-    log_file = f"{log_dir}/test_cube{args.cube_size}_{args.cube_type}_{model_id}_{epoch}_B{args.B}.json"
+    log_file = f"{log_dir}/test_{info['model_name']}_{info['model_id']}_{epoch}_B{args.B}.json"
 
-    # Load existing results if the log file already exists
-    try:
-        with open(log_file, 'r') as f:
-            results = json.load(f)
-    except FileNotFoundError:
-        results = []
-
-    total_length = sum(r["solution_length"] for r in results if r["solution_length"] is not None)
+    results = []
+    total_length = 0
     t1 = time.time()
-
-    for i, state in enumerate(tests[len(results):], start=len(results)):
+    for i, state in enumerate(tests, start=0):
         moves, attempts = searcher.get_solution(state, B=args.B)
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         

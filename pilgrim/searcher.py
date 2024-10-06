@@ -4,7 +4,7 @@ from .model import batch_process
 from tqdm import tqdm
 
 class Searcher:
-    def __init__(self, model, all_moves, V0, device=None):
+    def __init__(self, model, all_moves, V0, device=None, verbose=0):
         self.model = model.to(device)
         self.all_moves = all_moves
         self.V0 = V0
@@ -12,6 +12,7 @@ class Searcher:
         self.state_size = all_moves.size(1)
         self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.hash_vec = torch.randint(0, int(1e15), (self.state_size,), device=self.device)
+        self.verbose = verbose
     
     def get_neighbors(self, states, batch_size=2**14):
         """Return neighboring states for each state in the batch."""
@@ -53,11 +54,15 @@ class Searcher:
             tree_idx = torch.zeros((num_steps, B), dtype=torch.int64)
             y_pred = torch.tensor([0], dtype=torch.float64, device=self.device)
             states_hash_log = [0] * 4
-
-            pbar = tqdm(range(num_steps))
+            
+            if self.verbose:
+                pbar = tqdm(range(num_steps))
+            else:
+                pbar = range(num_steps)
             for j in pbar:
                 states, y_pred, moves, idx = self.do_greedy_step(states, y_pred, states_bad_hashed, B)
-                pbar.set_description(f"  y_min = {y_pred.min().item():.1f}, y_mean = {y_pred.mean().item():.1f}, y_max = {y_pred.max().item():.1f}")
+                if self.verbose:
+                    pbar.set_description(f"  y_min = {y_pred.min().item():.1f}, y_mean = {y_pred.mean().item():.1f}, y_max = {y_pred.max().item():.1f}")
                 states_hash_log[j % 4] = state2hash(states, self.hash_vec)
                 leaves_num = states.size(0)
                 tree_move[j, :leaves_num] = moves
