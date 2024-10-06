@@ -125,7 +125,7 @@ class Trainer:
                 timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 
         # Save final weights
-        final_weights_file = f"{self.weights_dir}/{self.name}_{self.id}_e{self.epoch:05d}_final.pth"
+        final_weights_file = f"{self.weights_dir}/{self.name}_{self.id}_e{self.epoch:05d}final.pth"
         torch.save(self.net.state_dict(), final_weights_file)
 
         # Print final saving information
