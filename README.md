@@ -59,10 +59,11 @@ python train.py --hd1 2000 --hd2 1418 --nrd 2 --epochs 100 --cube_size 4 --cube_
 *   `--epochs`: Number of training epochs.
 *   `--batch_size`: Batch size (default `10000`).
 *   `--lr`: Learning rate for the optimizer (default `0.001`).
+*   `--optimizer`: Optimizer, `Adam` or `AdamSF` means schedulefree module use (default `Adam`).
 *   `--K_min` and `--K_max`: Minimum and maximum values for random walks (default `1` and `30`).
 *   `--cube_size`: Cube size (e.g., `3` for 3x3x3 or `4` for 4x4x4).
 *   `--cube_type`: Cube move set (`qtm` for quarter-turn metric or `all` for all moves).
-*   `--name`: Training session name (optional, auto-generated if not provided).
+*   `--device_id`: Device ID to use different graphics card (default `0`).
 
 
 ## Testing the Model
@@ -83,6 +84,8 @@ python test.py --cube_size 4 --cube_type all --weights weights/cube4_all_MLP2_20
 *   `--tests`: Path to the test dataset (optional). If not provided, it defaults to the dataset in `datasets/{cube_type}_cube{cube_size}.pt`.
 *   `--B`: Beam size for the beam search (default `4096`).
 *   `--tests_num`: Number of test cases to run (default `10`).
+*   `--device_id`: Device ID to use different graphics card.
+*   `--verbose`: Each step of beam search printed as tqdm, default is 0.
 
 
 ### Output
