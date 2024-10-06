@@ -33,12 +33,12 @@ Pilgrim Library is a Python library for efficient state space search and model t
 
 ### Running the Training Script
 
-You can run the `train.py` script to train a model on cube-based data. The model architecture is flexible, allowing different hidden layer sizes and residual blocks to be used.
+You can run the `train.py` script to train a model on cube-based data. Each epoch model see 1M cubes sampled with K ∈ \[1, K_max\]. The model architecture is flexible, allowing different hidden layer sizes and residual blocks to be used.
 
 #### Basic Usage
 
 ```bash
-python train.py --hd1 2000 --hd2 1418 --nrd 2 --epochs 100 --cube_size 4 --cube_type all
+python train.py --cube_size 4 --cube_type all --K_max 48 --hd1 1000 --hd2 500 --nrd 2 --epochs 256
 ```
 
 #### Parameters:
@@ -56,6 +56,46 @@ python train.py --hd1 2000 --hd2 1418 --nrd 2 --epochs 100 --cube_size 4 --cube_
 *   `--device_id`: Device ID to use different graphics card (default `0`).
 
 
+#### Output
+
+When you run the training script, the following output and files are generated:
+
+1. **Training Logs (CSV)**:
+    - A CSV file is created in the `logs/` directory that tracks the training progress. This file logs the following information for each epoch:
+        - `epoch`: The current epoch number.
+        - `train_loss`: The loss value at the end of each epoch.
+        - `vertices_seen`: The number of vertices (data points) seen in each epoch.
+        - `data_gen_time`: Time taken to generate the training data for the current epoch.
+        - `train_epoch_time`: Time taken to complete the training step for the current epoch.
+    - The file is saved with the naming convention: `train_{model_name}_{model_id}.csv`.
+
+2. **Model Weights (Checkpoint Files)**:
+    - The model weights are saved periodically during training:
+        - **Power of Two Epochs**: Weights are saved at epochs that are powers of two (e.g., epoch 1, 2, 4, 8, 16, ...). These weights are saved in the `weights/` directory with the filename:
+          `weights/{model_name}_{model_id}_e{epoch}.pth`.
+        - **Epoch 10,000 and 50,000**: If training reaches these epochs, weights are saved with the filename:
+          `weights/{model_name}_{model_id}_e10000.pth` and `weights/{model_name}_{model_id}_e50000.pth`.
+        - **Final Weights**: After the final epoch, the weights are saved with the filename:
+          `weights/{model_name}_{model_id}_e{final_epoch}_final.pth`.
+
+#### Model Name Generation
+
+The `model_name` is automatically generated based on the cube size, cube type, model architecture, and the number of parameters in the model. This helps uniquely identify the model being trained and is used for logging and saving model weights.
+
+The `model_name` is constructed using the following format:
+
+~~~~text
+cube{cube_size}_{cube_type}_{mode}_{num_parameters}M
+~~~~
+
+Where:
+
+*   **`mode`**: The architecture of the model, determined by the following:
+    *   `"MLP1"`: When both `hd2=0` and `nrd=0`.
+    *   `"MLP2"`: When `hd2>0` and `nrd=0`.
+    *   `"MLP2RB"`: When `hd2>0` and `nrd>0` (i.e., when residual blocks are included).
+*   **`num_parameters`**: The total number of trainable parameters in the model, rounded to millions (`M`).
+
 ### Testing the Model
 
 You can test a trained **Pilgrim** model using the `test.py` script. This script loads the model, applies it to a set of cube states, and attempts to solve them using a beam search.
@@ -63,7 +103,7 @@ You can test a trained **Pilgrim** model using the `test.py` script. This script
 #### Basic Usage
 
 ~~~~bash
-python test.py --cube_size 4 --cube_type all --weights weights/cube4_all_MLP2_2000_1418_0_4.00M_1727996220_e2pow14.pth --tests_num 10 --B 4096
+python test.py --cube_size 4 --cube_type all --weights weights/cube4_all_MLP2_01M_1728177387_e00256.pth --tests_num 10 --B 65536
 ~~~~
 
 #### Parameters
@@ -80,13 +120,21 @@ python test.py --cube_size 4 --cube_type all --weights weights/cube4_all_MLP2_20
 
 #### Output
 
-*   **Log File**: The test results, including solution lengths and attempts, are saved to a log file in the `logs/` directory. The log file is named based on the cube size, cube type, model ID, epoch, and beam size:
 
-	~~~~text
-	logs/test_cube4_qtm_123456_10000_B4096.json
-	~~~~
+*   **Log File**: The test results, including solution lengths and attempts, are saved to a log file in the `logs/` directory. The log file is named based on the model name, model ID, epoch, and beam size:
 
-*   **Console Output**: The solution length for each solved test case is printed to the console. If a solution is not found, it will print "Solution not found" for that test case.
+    ~~~~text
+    logs/test_{model_name}_{model_id}_{epoch}_B{beam_size}.json
+    ~~~~
+
+    The log file contains the following information for each test case:
+    *   `test_num`: The index of the test case.
+    *   `solution_length`: The number of moves in the solution (if found).
+    *   `attempts`: The number of attempts made by the searcher to solve the test case.
+    *   `moves`: The sequence of moves for solving the cube, stored as a list.
+    
+    If no solution is found, the `solution_length`, `attempts`, and `moves` will be set to `None`.
+
 
 #### Average Solution Length
 
