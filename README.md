@@ -31,17 +31,17 @@ Pilgrim Library is a Python library for efficient state space search and model t
     pip install -r requirements.txt
     ```
 
-### Running the Training Script
+## Running the Training Script
 
 You can run the `train.py` script to train a model on cube-based data. Each epoch model see 1M cubes sampled with K ∈ \[1, K_max\]. The model architecture is flexible, allowing different hidden layer sizes and residual blocks to be used.
 
-#### Basic Usage
+### Basic Usage
 
 ```bash
 python train.py --cube_size 4 --cube_type all --K_max 48 --hd1 1000 --hd2 500 --nrd 2 --epochs 256
 ```
 
-#### Parameters:
+### Parameters:
 
 *   `--hd1`: Size of the first hidden layer (e.g., `2000`).
 *   `--hd2`: Size of the second hidden layer (`0` means no second layer).
@@ -96,17 +96,17 @@ Where:
     *   `"MLP2RB"`: When `hd2>0` and `nrd>0` (i.e., when residual blocks are included).
 *   **`num_parameters`**: The total number of trainable parameters in the model, rounded to millions (`M`).
 
-### Testing the Model
+## Testing the Model
 
 You can test a trained **Pilgrim** model using the `test.py` script. This script loads the model, applies it to a set of cube states, and attempts to solve them using a beam search.
 
-#### Basic Usage
+### Basic Usage
 
 ~~~~bash
 python test.py --cube_size 4 --cube_type all --weights weights/cube4_all_MLP2_01M_1728177387_e00256.pth --tests_num 10 --B 65536
 ~~~~
 
-#### Parameters
+### Parameters
 
 *   `--cube_size`: The size of the cube (e.g., `4` for 4x4x4 cube).
 *   `--cube_type`: The cube type, either `qtm` (quarter-turn metric) or `all` (all moves).
@@ -134,8 +134,3 @@ python test.py --cube_size 4 --cube_type all --weights weights/cube4_all_MLP2_01
     *   `moves`: The sequence of moves for solving the cube, stored as a list.
     
     If no solution is found, the `solution_length`, `attempts`, and `moves` will be set to `None`.
-
-
-#### Average Solution Length
-
-At the end of the test, the script calculates the average solution length across all solved cubes and prints it along with the total time taken for testing.
