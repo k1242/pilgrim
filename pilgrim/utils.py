@@ -34,22 +34,22 @@ def state2hash(states, hash_vec, batch_size=2**14):
         result[i * batch_size:(i + 1) * batch_size] = batch_hash
     return result
 
-def get_unique_states(states, bad_hashes, hash_vec):
-    """Filter unique states by removing duplicates based on hash."""
-    hashed = state2hash(states, hash_vec)
-    mask = ~torch.isin(hashed, bad_hashes)
-    hashed_filtered = hashed[mask]
-    unique_mask = torch.concat(
-        (torch.tensor([True], device=states.device), hashed_filtered[1:] - hashed_filtered[:-1] > 0)
-    )
-    return states[mask][unique_mask]
-
 def get_unique_states(states, states_bad_hashed, hash_vec):
     """Filter unique states by removing duplicates based on hash."""
     idx1 = torch.arange(states.size(0), dtype=torch.int64, device=states.device)
+#     print(f'debug (get_unique_states): {idx1.shape = }')
     hashed = state2hash(states, hash_vec)
+#     print(f'debug (get_unique_states): {hashed.shape = }')
+#     print(f'debug (get_unique_states): {states_bad_hashed.shape = }')
     mask1  = ~torch.isin(hashed, states_bad_hashed)
+#     print(f'debug (get_unique_states): {mask1.shape = }')
     hashed = hashed[mask1]
+#     print(f'debug (get_unique_states): {hashed.shape = }')
     hashed_sorted, idx2 = torch.sort(hashed)
+#     print(f'debug (get_unique_states): {hashed_sorted.shape = }')
+#     print(f'debug (get_unique_states): {idx2.shape = }')
     mask2 = torch.concat((torch.tensor([True], device=states.device), hashed_sorted[1:] - hashed_sorted[:-1] > 0))
+#     print(f'debug (get_unique_states): {mask2.shape = }')
     return states[mask1][idx2[mask2]], idx1[mask1][idx2[mask2]] 
+
+
