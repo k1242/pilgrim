@@ -20,7 +20,7 @@ def main():
     args = parser.parse_args()
     # Load model info
     log_dir = "logs"
-    with open(f"{log_dir}/model_{'_'.join(args.weights.split('_')[:-1])[8:]}.json", "r") as json_file:
+    with open(f"{log_dir}/model_{'_'.join(args.weights.split('/')[-1].split('_')[:-1])}.json", "r") as json_file:
         info = json.load(json_file)
     
     # Set device (GPU if available, otherwise CPU)
