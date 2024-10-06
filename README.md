@@ -31,16 +31,6 @@ Pilgrim Library is a Python library for efficient state space search and model t
     pip install -r requirements.txt
     ```
 
-### Data Setup
-
-You will need to populate the `generators/` folder with `.json` files that define the cube moves and states for the desired cube size and type (if provided not enough). The files should follow this structure:
-- `generators/qtm_cube4.json`
-- `generators/all_cube4.json`
-
-These JSON files should contain two keys:
-- `actions`: A list of tensors representing the moves.
-- `names`: A list of move names.
-
 ### Running the Training Script
 
 You can run the `train.py` script to train a model on cube-based data. The model architecture is flexible, allowing different hidden layer sizes and residual blocks to be used.
@@ -66,17 +56,17 @@ python train.py --hd1 2000 --hd2 1418 --nrd 2 --epochs 100 --cube_size 4 --cube_
 *   `--device_id`: Device ID to use different graphics card (default `0`).
 
 
-## Testing the Model
+### Testing the Model
 
 You can test a trained **Pilgrim** model using the `test.py` script. This script loads the model, applies it to a set of cube states, and attempts to solve them using a beam search.
 
-### Basic Usage
+#### Basic Usage
 
 ~~~~bash
 python test.py --cube_size 4 --cube_type all --weights weights/cube4_all_MLP2_2000_1418_0_4.00M_1727996220_e2pow14.pth --tests_num 10 --B 4096
 ~~~~
 
-### Parameters
+#### Parameters
 
 *   `--cube_size`: The size of the cube (e.g., `4` for 4x4x4 cube).
 *   `--cube_type`: The cube type, either `qtm` (quarter-turn metric) or `all` (all moves).
@@ -88,7 +78,7 @@ python test.py --cube_size 4 --cube_type all --weights weights/cube4_all_MLP2_20
 *   `--verbose`: Each step of beam search printed as tqdm, default is 0.
 
 
-### Output
+#### Output
 
 *   **Log File**: The test results, including solution lengths and attempts, are saved to a log file in the `logs/` directory. The log file is named based on the cube size, cube type, model ID, epoch, and beam size:
 
@@ -98,6 +88,6 @@ python test.py --cube_size 4 --cube_type all --weights weights/cube4_all_MLP2_20
 
 *   **Console Output**: The solution length for each solved test case is printed to the console. If a solution is not found, it will print "Solution not found" for that test case.
 
-### Average Solution Length
+#### Average Solution Length
 
 At the end of the test, the script calculates the average solution length across all solved cubes and prints it along with the total time taken for testing.
