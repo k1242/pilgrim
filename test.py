@@ -106,7 +106,9 @@ def main():
     avg_length = total_length / len(solved_results) if solved_results else 0
 
     # Print completion message with average solution length
-    print(f"Test completed in {(t2 - t1):.2f}s. Average solution length: {avg_length:.2f}. Results saved to {log_file}.")
+    print(f"Test completed in {(t2 - t1):.2f}s.")
+    print(f"Average solution length: {avg_length:.2f}.")
+    print(f"Results saved to {log_file}.")
 
 if __name__ == "__main__":
     main()
