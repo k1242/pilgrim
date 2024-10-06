@@ -13,7 +13,18 @@ Pilgrim Library is a Python library for efficient state space search and model t
 
  # Pilgrim: Random Walk Based Neural Network Training
 
-**Pilgrim** is a Python library designed for training neural networks using random walks. The model architecture can be customized with different layers and residual blocks, and the cube moves are derived from either the **quarter-turn metric (QTM)** or **all moves** (including half turns). This library supports training on various cube sizes (e.g., 3x3x3, 4x4x4) and allows for flexible architecture and hyperparameter configurations.
+**Pilgrim** project provides tools to train and test models capable of solving NxNxN Rubik's cubes. It includes two main scripts: `train.py` for training a model and `test.py` for testing cube solutions.
+
+**`train.py`** trains a model to predict the diffusion distance, which is calculated using random walks from the solved cube state. The diffusion distance serves as a metric that creates a good ordering between cube states, simplifying the search for solutions.
+
+Once the model is trained, **`test.py`** can be used to solve Rubik's cubes using beam search. The model's solutions — including solution lengths and the number of attempts — are logged in result files.
+
+Within 10 minutes of training, the model will be able to:
+- Solve a 3x3x3 cube in seconds.
+- Solve a 4x4x4 cube in under a minute.
+
+This approach allows for efficient and quick solutions for Rubik's cubes of various sizes, using a model trained to predict diffusion distances. The proposed method achieves state-of-the-art (SOTA) results in solving Rubik's cubes with high efficiency and speed.
+
 
 
 ## Getting Started
