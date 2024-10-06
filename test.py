@@ -13,6 +13,8 @@ def main():
     parser.add_argument("--tests", type=str, default='', help="Path to the tests.")
     parser.add_argument("--weights", type=str, required=True, help="Path to the model weights")
     parser.add_argument("--B", type=int, default=4096, help="Beam size")
+    parser.add_argument("--num_attempts", type=int, default=2, help="Number of allowed restarts.")
+    parser.add_argument("--num_steps", type=int, default=200, help="Number of allowed steps in one beam search run.")
     parser.add_argument("--tests_num", type=int, default=10, help="Number of tests to run")
     parser.add_argument("--device_id", type=int, default=0, help="Device ID")
     parser.add_argument("--verbose", type=int, default=0, help="Use tqdm if verbose > 0.")
@@ -69,7 +71,7 @@ def main():
     total_length = 0
     t1 = time.time()
     for i, state in enumerate(tests, start=0):
-        moves, attempts = searcher.get_solution(state, B=args.B)
+        moves, attempts = searcher.get_solution(state, B=args.B, num_steps=args.num_steps, num_attempts=args.num_attempts)
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         
         if moves is not None:
