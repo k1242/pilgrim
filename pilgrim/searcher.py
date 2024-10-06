@@ -84,7 +84,7 @@ class Searcher:
                     break
                 elif (j > 3 and self.check_stagnation(states_hash_log)):
 #                     print(f'debug: stagnation at step {j}')
-                    states_bad_hashed = torch.concat((states_bad_hashed, torch.concat(states_hash_log)))
+                    states_bad_hashed = torch.concat((states_bad_hashed, torch.concat(list(states_hash_log))))
                     states_bad_hashed = torch.unique(states_bad_hashed)
                     break
 
