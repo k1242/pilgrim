@@ -145,3 +145,9 @@ python test.py --cube_size 4 --cube_type all --weights weights/cube4_all_MLP2_01
     *   `moves`: The sequence of moves for solving the cube, stored as a list.
     
     If no solution is found, the `solution_length`, `attempts`, and `moves` will be set to `None`.
+   
+
+## Support Us
+
+If you find this project helpful or interesting, please consider giving it a ⭐. It helps others discover the project and motivates to keep improving it. Thank you for your support!
+
