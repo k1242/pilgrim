@@ -91,7 +91,7 @@ class Searcher:
             if (states == self.V0).all(dim=1).any():
                 break
         
-        if J + 2 == num_attempts:
+        if not (states == self.V0).all(dim=1).any():
             return None, J
         
         # Reverse the tree to reconstruct the path
