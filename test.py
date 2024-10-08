@@ -44,7 +44,8 @@ def main():
     # Load model and weights
     model = Pilgrim(state_size=state_size, 
                     hd1=info['hd1'], hd2=info['hd2'], nrd=info['nrd'], 
-                    activation_function=info['activation'], use_batch_norm=info['use_batch_norm'])
+                    activation_function=info.get('activation', 'relu'), 
+                    use_batch_norm=info.get('use_batch_norm', True))
     model.load_state_dict(torch.load(args.weights, weights_only=False, map_location=device))
     model.eval()
     
