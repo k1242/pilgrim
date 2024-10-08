@@ -34,7 +34,7 @@ def main():
                         help="List of epoch numbers to use for testing.")
     parser.add_argument("--B", nargs='+', type=int, required=True, 
                         help="List of beam sizes to use in beam search.")
-    parser.add_argument("--num_attempts", type=int, default=2, 
+    parser.add_argument("--num_attempts", type=int, default=1, 
                         help="Number of allowed restarts.")
     parser.add_argument("--num_steps", type=int, default=200, 
                         help="Number of allowed steps in one beam search run.")
