@@ -58,8 +58,8 @@ class Searcher:
         states_bad_hashed = torch.tensor([], dtype=torch.int64, device=self.device)
         for J in range(num_attempts):
             states = state.unsqueeze(0).clone()
-            tree_move = torch.zeros((num_steps, B), dtype=torch.int64)
-            tree_idx = torch.zeros((num_steps, B), dtype=torch.int64)
+            tree_move = torch.zeros((num_steps, B), dtype=torch.int64) #why not on the device?
+            tree_idx = torch.zeros((num_steps, B), dtype=torch.int64)  #why not on the device?
             y_pred = torch.tensor([0], dtype=torch.float64, device=self.device)
             states_hash_log = deque(maxlen=4)
             
