@@ -27,7 +27,9 @@ def main():
     
     # Set device (GPU if available, otherwise CPU)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu", args.device_id)
-    print(f"Start testing with {device}.")
+#     device = torch.device("cpu")
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+    print(f"[{timestamp}] Start testing with {device}.")
 
     # Load cube data (moves and names)
     all_moves, move_names = load_cube_data(args.cube_size, args.cube_type, device)
