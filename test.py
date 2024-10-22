@@ -75,7 +75,9 @@ def main():
     total_length = 0
     t1 = time.time()
     for i, state in enumerate(tests, start=0):
+        solution_time_start = time.time()
         moves, attempts = searcher.get_solution(state, B=args.B, num_steps=args.num_steps, num_attempts=args.num_attempts)
+        solution_time_end = time.time()
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         
         if moves is not None:
@@ -83,9 +85,10 @@ def main():
             total_length += solution_length
             
             result = {
-                "test_num": i,
+                "test_num": i+args.shift,
                 "solution_length": solution_length,
                 "attempts": attempts + 1,
+                "time": round(solution_time_end - solution_time_start, 2),
                 "moves": moves.tolist()
             }
             
@@ -94,9 +97,10 @@ def main():
         else:
             # If no solution is found
             result = {
-                "test_num": i,
+                "test_num": i+args.shift,
                 "solution_length": None,
                 "attempts": None,
+                "time": round(solution_time_end - solution_time_start, 2),
                 "moves": None
             }
             print(f"[{timestamp}] Solution {i} not found")
