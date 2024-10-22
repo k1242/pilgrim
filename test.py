@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--tests_num", type=int, default=10, help="Number of tests to run")
     parser.add_argument("--device_id", type=int, default=0, help="Device ID")
     parser.add_argument("--verbose", type=int, default=0, help="Use tqdm if verbose > 0.")
+    parser.add_argument("--shift", type=int, default=0, help="Shift part of the dataset.")
     
     args = parser.parse_args()
     # Load model info
@@ -57,7 +58,7 @@ def main():
     else:
         tests_path = args.tests
     tests = torch.load(tests_path, weights_only=False, map_location=device)
-    tests = tests[:args.tests_num]
+    tests = tests[args.shift:args.shift+args.tests_num]
     tests = tests.to(device)
 
     # Initialize Searcher object

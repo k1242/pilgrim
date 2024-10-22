@@ -55,7 +55,7 @@ class Searcher:
             moved_states[i:i+self.batch_size] = torch.gather(states[i:i+self.batch_size], 1, self.all_moves[moves[i:i+self.batch_size]])
         return moved_states
     
-#     def do_greedy_step(self, states, value_last, states_bad_hashed, B=1000):
+#     def do_greedy_step(self, states, states_bad_hashed, B=1000):
 #         """Perform a greedy step to find the best neighbors."""
 #         idx0 = torch.arange(states.size(0), device=self.device).repeat_interleave(self.n_gens)
 #         moves = torch.arange(self.n_gens, device=self.device).repeat(states.size(0))
@@ -69,7 +69,7 @@ class Searcher:
         
 #         return neighbors[idx2], value[idx2], moves[idx1[idx2]], idx0[idx1[idx2]] 
    
-    def do_greedy_step(self, states, value_last, states_bad_hashed, B=1000):
+    def do_greedy_step(self, states, states_bad_hashed, B=1000):
         """Perform a greedy step to find the best neighbors."""
         idx0 = torch.arange(states.size(0), device=self.device).repeat_interleave(self.n_gens)
         moves = torch.arange(self.n_gens, device=self.device).repeat(states.size(0))
@@ -89,8 +89,6 @@ class Searcher:
         
         next_states = torch.empty(idx2.size(0), self.state_size, dtype=states.dtype, device=self.device)
         for i in range(0, idx2.size(0), self.batch_size):
-            t1 = idx1[idx2[i:i+self.batch_size]]
-            t2 = moves[idx1[idx2[i:i+self.batch_size]]]
             next_states[i:i+self.batch_size] = self.apply_move(
                 states[idx0[idx1[idx2[i:i+self.batch_size]]]], 
                 moves[idx1[idx2[i:i+self.batch_size]]])
@@ -107,9 +105,8 @@ class Searcher:
         states_bad_hashed = torch.tensor([], dtype=torch.int64, device=self.device)
         for J in range(num_attempts):
             states = state.unsqueeze(0).clone()
-            tree_move = torch.zeros((num_steps, B), dtype=torch.int64) #why not on the device?
-            tree_idx = torch.zeros((num_steps, B), dtype=torch.int64)  #why not on the device?
-            y_pred = torch.tensor([0], dtype=torch.float64, device=self.device)
+            tree_move = torch.zeros((num_steps, B), dtype=torch.int64)
+            tree_idx = torch.zeros((num_steps, B), dtype=torch.int64)
             states_hash_log = deque(maxlen=4)
             
             if self.verbose:
@@ -117,7 +114,7 @@ class Searcher:
             else:
                 pbar = range(num_steps)
             for j in pbar:
-                states, y_pred, moves, idx = self.do_greedy_step(states, y_pred, states_bad_hashed, B)
+                states, y_pred, moves, idx = self.do_greedy_step(states, states_bad_hashed, B)
                 if self.verbose:
                     pbar.set_description(
                         f"  y_min = {y_pred.min().item():.1f}, y_mean = {y_pred.mean().item():.1f}, y_max = {y_pred.max().item():.1f}"

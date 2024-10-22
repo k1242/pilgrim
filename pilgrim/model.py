@@ -114,21 +114,13 @@ def batch_process(model, data, device, batch_size):
     model.eval()
     model.to(device)
 
-    n_samples = data.shape[0]
-    outputs = []
+    outputs = torch.empty(data.size(0), dtype=torch.float32, device=device)
 
     # Process each batch
-    for start in range(0, n_samples, batch_size):
-        end = start + batch_size
-        batch = data[start:end].to(device)
-
+    for i in range(0, data.size(0), batch_size):
+        batch = data[i:i+batch_size].to(device)
         with torch.no_grad():
             batch_output = model(batch).flatten()
-        
-        # Store the output
-        outputs.append(batch_output)
+        outputs[i:i+batch_size] = batch_output
 
-    # Concatenate all collected outputs
-    final_output = torch.cat(outputs, dim=0)
-
-    return final_output
+    return outputs

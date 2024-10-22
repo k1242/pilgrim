@@ -19,6 +19,7 @@ def main():
     parser.add_argument("--use_batch_norm", type=bool, default=True, help="Batch normalization usage (True or False, default True).")
     parser.add_argument("--K_min", type=int, default=1, help="Minimum K value for random walks")
     parser.add_argument("--K_max", type=int, default=30, help="Maximum K value for random walks")
+    parser.add_argument("--weights", type=str, default='', help="Path to file with model weights.")
     parser.add_argument("--device_id", type=int, default=0, help="Device ID")
     
     # Cube parameters
@@ -67,6 +68,10 @@ def main():
         dropout_rate=args.dropout,
         activation_function=args.activation
     ).to(device)
+    
+    if len(args.weights) > 0:
+        model.load_state_dict(torch.load(f"weights/{args.weights}.pth", weights_only=True, map_location=device))
+        print(f"Weights {args.weights} loaded.")
 
     # Calculate the number of model parameters
     num_parameters = count_parameters(model)

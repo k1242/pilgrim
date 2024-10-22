@@ -44,6 +44,8 @@ def main():
                         help="Device ID")
     parser.add_argument("--verbose", type=int, default=0, 
                         help="Use tqdm if verbose > 0.")
+    parser.add_argument("--shift", type=int, default=0, 
+                        help="Shift part of the dataset.")
     
     args = parser.parse_args()
     
@@ -91,6 +93,7 @@ def main():
                     "--tests", str(args.tests),
                     "--verbose", str(args.verbose),
                     "--device_id", str(args.device_id), 
+                    "--shift", str(args.shift), 
                     "--num_steps", str(args.num_steps),
                     "--num_attempts", str(args.num_attempts)
                 ]
