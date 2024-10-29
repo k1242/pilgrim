@@ -69,7 +69,14 @@ def main():
     
     # Prepare log file
     os.makedirs(log_dir, exist_ok=True)
-    log_file = f"{log_dir}/test_{info['model_name']}_{info['model_id']}_{epoch}_B{args.B}.json"
+    log_file_add = ""
+    if len(args.tests) > 0:
+        log_file_add = log_file_add + "tests_" + args.tests.split("/")[1].split(".")[0]
+    if args.shift > 0:
+        log_file_add = log_file_add + f"_shift{args.shift}"
+    if len(log_file_add) > 0:
+        log_file_add = "_" + log_file_add
+    log_file = f"{log_dir}/test_{info['model_name']}_{info['model_id']}_{epoch}_B{args.B}{log_file_add}.json"
 
     results = []
     total_length = 0
