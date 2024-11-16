@@ -11,9 +11,9 @@ Pilgrim Library is a Python library for efficient state space search and model t
  -->
 
 
- # Pilgrim: Random Walk Based Neural Network Training
+ # Pilgrim: Zero-Human-Knowledge NN Training with Random Walks for Puzzle Solving
 
-**Pilgrim** project provides tools to train and test models capable of solving NxNxN Rubik's cubes. It includes two main scripts: `train.py` for training a model and `test.py` for testing cube solutions.
+**Pilgrim** (this program is part of the CayleyPy project) provides tools to train and test models capable of solving NxNxN Rubik's cubes. It includes two main scripts: `train.py` for training a model and `test.py` for testing cube solutions. 
 
 **`train.py`** trains a model to predict the diffusion distance, which is calculated using random walks from the solved cube state. The diffusion distance serves as a metric that creates a good ordering between cube states, simplifying the search for solutions.
 
