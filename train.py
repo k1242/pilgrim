@@ -21,6 +21,7 @@ def main():
     parser.add_argument("--K_max", type=int, default=30, help="Maximum K value for random walks")
     parser.add_argument("--weights", type=str, default='', help="Path to file with model weights.")
     parser.add_argument("--device_id", type=int, default=0, help="Device ID")
+    parser.add_argument("--alpha", type=float, default=1, help="TD-learning parameter, avg 1/α steps.")
     
     # Cube parameters
     parser.add_argument("--cube_size", type=int, default=4, help="Cube size (e.g., 4 for 4x4x4 cube)")
@@ -92,7 +93,8 @@ def main():
         K_max=args.K_max,
         all_moves=all_moves,
         inverse_moves=inverse_moves,
-        V0=V0
+        V0=V0,
+        α=args.alpha
     )
     
     # Save the arguments to a log file

@@ -2,3 +2,8 @@ logs/
 weights/
 __pycache__/
 zip/
+get_mean_dd.py
+DD.ipynb
+forest/
+outputs/
+.ipynb_checkpoints/

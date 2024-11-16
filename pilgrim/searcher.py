@@ -100,13 +100,14 @@ class Searcher:
         return torch.isin(torch.concat(list(states_log)[2:]), torch.concat(list(states_log)[:2])).all().item()
 
     
-    def get_solution(self, state, B=2**12, num_steps=200, num_attempts=10):
+    def get_solution(self, state, B=2**12, num_steps=200, num_attempts=10, return_tree=False):
         """Main solution-finding loop that attempts to solve the cube."""
         states_bad_hashed = torch.tensor([], dtype=torch.int64, device=self.device)
         for J in range(num_attempts):
             states = state.unsqueeze(0).clone()
-            tree_move = torch.zeros((num_steps, B), dtype=torch.int64)
-            tree_idx = torch.zeros((num_steps, B), dtype=torch.int64)
+            tree_move = -torch.ones((num_steps, B), dtype=torch.int64)
+            tree_idx = -torch.ones((num_steps, B), dtype=torch.int64)
+#             tree_value = -torch.ones((num_steps, B), dtype=torch.int64)
             states_hash_log = deque(maxlen=4)
             
             if self.verbose:
@@ -139,6 +140,7 @@ class Searcher:
         
         # Reverse the tree to reconstruct the path
         tree_idx, tree_move = tree_idx[:j+1].flip((0,)), tree_move[:j+1].flip((0,))
+        
         V0_pos = torch.nonzero((states == self.V0).all(dim=1), as_tuple=True)[0].item()
         
         # Construct the path
@@ -147,7 +149,10 @@ class Searcher:
             path.append(tree_idx[k, path[-1]].item())
         
         moves_seq = torch.tensor([tree_move[k, path[k-1]] if k > 0 else tree_move[k, V0_pos] for k in range(j+1)], dtype=torch.int64)
-        return moves_seq.flip((0,)), J
+        if return_tree:
+            return moves_seq.flip((0,)), J, torch.concat((tree_idx.unsqueeze(0), tree_move.unsqueeze(0))).cpu()
+        else:
+            return moves_seq.flip((0,)), J
     
     def pred_d(self, states):
         """Predict values for states using the model."""

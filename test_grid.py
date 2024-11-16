@@ -46,6 +46,8 @@ def main():
                         help="Use tqdm if verbose > 0.")
     parser.add_argument("--shift", type=int, default=0, 
                         help="Shift part of the dataset.")
+    parser.add_argument("--return_tree", type=int, default=0, 
+                        help="Save beam seach tree to 'forest' folder.")
     
     args = parser.parse_args()
     
@@ -95,7 +97,8 @@ def main():
                     "--device_id", str(args.device_id), 
                     "--shift", str(args.shift), 
                     "--num_steps", str(args.num_steps),
-                    "--num_attempts", str(args.num_attempts)
+                    "--num_attempts", str(args.num_attempts),
+                    "--return_tree", str(args.return_tree)
                 ]
                 
                 # Log the test execution details

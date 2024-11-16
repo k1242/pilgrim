@@ -19,10 +19,14 @@ def main():
     parser.add_argument("--device_id", type=int, default=0, help="Device ID")
     parser.add_argument("--verbose", type=int, default=0, help="Use tqdm if verbose > 0.")
     parser.add_argument("--shift", type=int, default=0, help="Shift part of the dataset.")
+    parser.add_argument("--return_tree", type=int, default=0, help="Save beam seach tree to 'forest' folder.")
     
     args = parser.parse_args()
-    # Load model info
+
     log_dir = "logs"
+    forest_dir = "forest"
+    
+    # Load model info
     with open(f"{log_dir}/model_{'_'.join(args.weights.split('/')[-1].split('_')[:-1])}.json", "r") as json_file:
         info = json.load(json_file)
     
@@ -83,7 +87,18 @@ def main():
     t1 = time.time()
     for i, state in enumerate(tests, start=0):
         solution_time_start = time.time()
-        moves, attempts = searcher.get_solution(state, B=args.B, num_steps=args.num_steps, num_attempts=args.num_attempts)
+        result = searcher.get_solution(
+            state, B=args.B, 
+            num_steps=args.num_steps, num_attempts=args.num_attempts, 
+            return_tree=args.return_tree
+        )
+        moves, attempts = result[:2]
+        if args.return_tree and moves is not None:
+            tree = result[2]
+            os.makedirs(forest_dir, exist_ok=True)
+            torch.save(tree.cpu(), f"{forest_dir}/tree_{args.cube_type}_{args.cube_size}_i{i+args.shift:04d}_B{args.B:08d}_{info['model_id']}.pt")  
+            torch.save(state.cpu(), f"{forest_dir}/state_{args.cube_type}_{args.cube_size}_i{i+args.shift:04d}_B{args.B:08d}_{info['model_id']}.pt") 
+    
         solution_time_end = time.time()
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         
