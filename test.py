@@ -19,9 +19,12 @@ def main():
     parser.add_argument("--device_id", type=int, default=0, help="Device ID")
     parser.add_argument("--verbose", type=int, default=0, help="Use tqdm if verbose > 0.")
     parser.add_argument("--shift", type=int, default=0, help="Shift part of the dataset.")
+    parser.add_argument("--skip_list", type=str, help="List of ids, that should be skipped, e.g. '[2, 5]'.")
     parser.add_argument("--return_tree", type=int, default=0, help="Save beam seach tree to 'forest' folder.")
     
     args = parser.parse_args()
+    if args.skip_list is not None:
+        args.skip_list = eval(args.skip_list)
 
     log_dir = "logs"
     forest_dir = "forest"
@@ -56,6 +59,10 @@ def main():
     model.load_state_dict(torch.load(args.weights, weights_only=False, map_location=device))
     model.eval()
     
+    # Fix float16
+    model = model.half()
+    model.dtype = torch.float16
+    
     # Load test dataset
     if len(args.tests) == 0:
         tests_path = f"datasets/{args.cube_type}_cube{args.cube_size}.pt"
@@ -75,17 +82,19 @@ def main():
     os.makedirs(log_dir, exist_ok=True)
     log_file_add = ""
     if len(args.tests) > 0:
-        log_file_add = log_file_add + "tests_" + args.tests.split("/")[1].split(".")[0]
+        log_file_add = log_file_add + "_tests-" + args.tests.split("/")[1].split(".")[0]
     if args.shift > 0:
         log_file_add = log_file_add + f"_shift{args.shift}"
-    if len(log_file_add) > 0:
-        log_file_add = "_" + log_file_add
+    if args.skip_list is not None:
+        log_file_add = log_file_add + f"_skip{args.skip_list}"
     log_file = f"{log_dir}/test_{info['model_name']}_{info['model_id']}_{epoch}_B{args.B}{log_file_add}.json"
 
     results = []
     total_length = 0
     t1 = time.time()
     for i, state in enumerate(tests, start=0):
+        if args.skip_list is not None and i+args.shift in args.skip_list:
+            continue
         solution_time_start = time.time()
         result = searcher.get_solution(
             state, B=args.B, 
@@ -115,7 +124,7 @@ def main():
             }
             
             # Print solution length for each solved cube
-            print(f"[{timestamp}] Solution {i}: Length = {solution_length}")
+            print(f"[{timestamp}] Solution {i+args.shift}: Length = {solution_length}")
         else:
             # If no solution is found
             result = {
@@ -125,7 +134,7 @@ def main():
                 "time": round(solution_time_end - solution_time_start, 2),
                 "moves": None
             }
-            print(f"[{timestamp}] Solution {i} not found")
+            print(f"[{timestamp}] Solution {i+args.shift} not found")
         
         results.append(result)
 

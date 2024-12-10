@@ -156,4 +156,6 @@ class Searcher:
     
     def pred_d(self, states):
         """Predict values for states using the model."""
-        return batch_process(self.model, states, self.device, 2**14).unsqueeze(0)
+        pred = batch_process(self.model, states, self.device, 2**14)
+#         pred[(states == self.V0).all(dim=-1)] = 0
+        return pred.unsqueeze(0)
