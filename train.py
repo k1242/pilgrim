@@ -5,6 +5,25 @@ import json
 from pilgrim import Trainer, Pilgrim
 from pilgrim import count_parameters, generate_inverse_moves, load_cube_data
 
+def save_model_id(model_id):
+    # Ensure the logs directory exists
+    log_dir = "logs"
+    os.makedirs(log_dir, exist_ok=True)
+
+    # Path to the model_id file
+    model_id_file = os.path.join(log_dir, "model_id.txt")
+
+    # Check if the file exists, if not create it and write the model_id
+    if not os.path.exists(model_id_file):
+        with open(model_id_file, "w") as f:
+            f.write(f"{model_id}\n")
+        print(f"Created new model_id file and saved model_id: {model_id}")
+    else:
+        # Append the model_id to the file
+        with open(model_id_file, "a") as f:
+            f.write(f"{model_id}\n")
+        print(f"Appended model_id: {model_id} to existing file")
+
 def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Train Pilgrim Model")
@@ -109,6 +128,9 @@ def main():
     # Save the args and model information in JSON format
     with open(f"{log_dir}/model_{name}_{trainer.id}.json", "w") as f:
         json.dump(args_dict, f, indent=4)
+        
+    # Save model_id
+    save_model_id(trainer.id)
 
     # Display model information
     print(f"Model Mode: {mode}")
